@@ -2,7 +2,8 @@
 # -*- coding: UTF8 -*-
 
 
-import xmlrpclib, time, md5
+import xmlrpclib, time
+from hashlib import md5
 
 LJ_TIME_FORMAT = r"%Y-%m-%d %H:%M:%S"
 
@@ -15,7 +16,7 @@ class rpcServer:
 
 	def __init__(self, user, password):
 		self.username = user
-		self.hpassword = md5.md5(password).hexdigest()
+		self.hpassword = md5(password).hexdigest()
 
 	def connect(self):
 		if not self.initialized:

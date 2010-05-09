@@ -12,20 +12,12 @@ import os, gtk, urllib2, copy
 from SimpleGladeApp import SimpleGladeApp
 
 try:
-	import gtkhtml2
-	gtkhtml_preview = True
-except ImportError:
-	gtkhtml_preview = False
-
-try:
     import webkit
     webkit_preview = True
 except ImportError:
     webkit_preview = False
 
 glade_dir = ""
-
-# Put your modules and data here
 
 import webbrowser, re, xmlrpclib, sys
 import conf, replacements, lj, format, cache, strdiff
@@ -43,11 +35,6 @@ class Window(SimpleGladeApp):
 		SimpleGladeApp.__init__(self, glade_path, root, domain)
 
 		# lets create preview control
-		if gtkhtml_preview:
-			self.browser = gtkhtml2.View()
-			self.scrollbrowser.add(self.browser)
-			self.browser.show()
-
 		if webkit_preview:
 			self.browser = webkit.WebView()
 			self.scrollbrowser.add(self.browser)
@@ -89,32 +76,6 @@ class Window(SimpleGladeApp):
 			self.togglePreview.set_active(False)
 			# edit mode
 			self.views.set_current_page(0)
-
-	# to allow preview control show images
-	def htmlview_request_url(self, document, url, stream):
-
-		file_404 = self.prog_dir+'file_broken.png'
-		# no protocol scecified
-		if url.count(':') == 0:
-			try:
-				local_file = file(self.prog_dir+url)
-			except IOError:
-				local_file = open(file_404)
-			stream.write(local_file.read())
-
-		# web-based
-		else:
-			try:
-				data = urllib2.urlopen(url).read()
-				stream.write(data)
-
-			except:
-				#print self.prog_dir+'broken-image.gif'
-				stream.write(open(file_404).read())
-
-		#for some reason gtkhtml2 does not show small (<1k) images
-		for i in range(0,10000):
-			stream.write(' ')
 
 	#context Window custom methods }
 
@@ -199,29 +160,15 @@ class Window(SimpleGladeApp):
 			text = buffer.get_text(start, end)
 			subject = self.subj.get_text()
 
-			if webkit_preview:
-				f = cache.get_temp()
-				f.write(self.preview_html(text))
-				self.browser.open('file://'+f.name)
-				self.views.set_current_page(1)
-				return
-
-			if gtkhtml_preview:
-				document = gtkhtml2.Document()
-				document.connect("request_url", self.htmlview_request_url)
-				document.clear()
-				document.open_stream('text/html')
-				document.write_stream(self.preview_html(text))
-				document.close_stream()
-				self.browser.set_document(document)
-				self.views.set_current_page(1)
-				return
-
 			f = cache.get_temp()
 			f.write(self.preview_html(text))
-			webbrowser.open('file://'+f.name)
-			widget.set_active(0)
-			return
+
+			if webkit_preview:
+				self.browser.open('file://'+f.name)
+				self.views.set_current_page(1)
+			else:
+				webbrowser.open('file://'+f.name)
+				widget.set_active(0)
 
 		else:
 			# edit mode
