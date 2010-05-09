@@ -10,18 +10,24 @@
 
 import os, gtk, urllib2, copy
 from SimpleGladeApp import SimpleGladeApp
+
 try:
 	import gtkhtml2
 	gtkhtml_preview = True
 except ImportError:
 	gtkhtml_preview = False
-	import webbrowser
+
+try:
+    import webkit
+    webkit_preview = True
+except ImportError:
+    webkit_preview = False
 
 glade_dir = ""
 
 # Put your modules and data here
 
-import re, xmlrpclib, sys
+import webbrowser, re, xmlrpclib, sys
 import conf, replacements, lj, format, cache, strdiff
 
 ENTER_KEYCODE = 65293 # FIXME - is there a named constant?
@@ -42,33 +48,38 @@ class Window(SimpleGladeApp):
 			self.scrollbrowser.add(self.browser)
 			self.browser.show()
 
+		if webkit_preview:
+			self.browser = webkit.WebView()
+			self.scrollbrowser.add(self.browser)
+			self.browser.show()
+
 	def new(self):
 		#context Window.new {
-		
+
 		# init program icon
 		prog_name = sys.argv[0]
 		if prog_name.rfind('/') == -1:
 			self.prog_dir = ''
 		else:
 			self.prog_dir = prog_name[:prog_name.rfind('/')+1]
-		
+
 		# to add images from prgdir to html preview
 		format.prog_dir = os.path.abspath(self.prog_dir)
-		
-		self.window.set_icon_from_file(self.prog_dir + "pen.png")			
+
+		self.window.set_icon_from_file(self.prog_dir + "pen.png")
 		#context Window.new }
 
 	#context Window custom methods {
 	#--- Write your own methods here ---#
 
 	def msg_box(self, message, m_type=gtk.MESSAGE_INFO, m_button=gtk.BUTTONS_CLOSE,):
-		msg = gtk.MessageDialog(parent=self.window, buttons=m_button, 
+		msg = gtk.MessageDialog(parent=self.window, buttons=m_button,
 			message_format=message, type=m_type)
 		msg.set_default_response(m_button)
 		msg.run()
 		msg.destroy()
 
-	
+
 	def clear(self):
 		self.subj.set_text("")
 		self.taglist.set_text("")
@@ -77,7 +88,7 @@ class Window(SimpleGladeApp):
 			#untoggle
 			self.togglePreview.set_active(False)
 			# edit mode
-			self.views.set_current_page(0)			
+			self.views.set_current_page(0)
 
 	# to allow preview control show images
 	def htmlview_request_url(self, document, url, stream):
@@ -90,13 +101,13 @@ class Window(SimpleGladeApp):
 			except IOError:
 				local_file = open(file_404)
 			stream.write(local_file.read())
-		
+
 		# web-based
 		else:
 			try:
 				data = urllib2.urlopen(url).read()
 				stream.write(data)
-				
+
 			except:
 				#print self.prog_dir+'broken-image.gif'
 				stream.write(open(file_404).read())
@@ -106,25 +117,25 @@ class Window(SimpleGladeApp):
 			stream.write(' ')
 
 	#context Window custom methods }
-	
+
 	def on_textview_key_release_event(self, widget, event):
 		#context Window.on_textview_key_release_event {
 		if not event.keyval in (ord(' '), ENTER_KEYCODE) :
 			return
-			
+
 		buffer = widget.get_buffer()
 		start, end = buffer.get_bounds()
 		text_b = buffer.get_text(start, end)
-		
+
 		# original text
 		a = unicode(copy.copy(text_b))
 		# text with replacements
 		b = unicode(copy.copy(text_b))
-		
+
 		# Typographic replacement magic!
 		for search, repl in replacements.inline:
 			b = re.sub(search, repl, b)
-	
+
 		r_diff = strdiff.diff(a, b)
 
 		# gtk drop and insert
@@ -134,14 +145,14 @@ class Window(SimpleGladeApp):
 			end.forward_chars(repl['drop_n'])
 			buffer.delete(start, end)
 			buffer.insert(start, repl['insert'])
-			
+
 		#context Window.on_textview_key_release_event }
 
 	def on_btnDelete_clicked(self, widget, *args):
 		#context Window.on_btnDelete_clicked {
 		if lj.last_event:
 			lj.del_event(lj.last_event['itemid'])
-		lj.last_event = {}	
+		lj.last_event = {}
 		self.clear()
 		#context Window.on_btnDelete_clicked }
 
@@ -158,7 +169,7 @@ class Window(SimpleGladeApp):
 			self.taglist.set_text(unicode(lj.last_event['props']['taglist']))
 		else:
 			self.taglist.set_text('')
-	
+
 		try:
 			text = cache.get(lj.last_event['itemid'])
 		except IOError:
@@ -179,7 +190,7 @@ class Window(SimpleGladeApp):
 
 	def on_togglePreview_toggled(self, widget, *args):
 		#context Window.on_togglePreview_toggled {
-		
+
 		if widget.get_active():
 			# the toggle button is down - go to preview mode
 
@@ -188,54 +199,61 @@ class Window(SimpleGladeApp):
 			text = buffer.get_text(start, end)
 			subject = self.subj.get_text()
 
-			if not gtkhtml_preview:
+			if webkit_preview:
 				f = cache.get_temp()
 				f.write(self.preview_html(text))
-				webbrowser.open('file://'+f.name)
-				widget.set_active(0)
+				self.browser.open('file://'+f.name)
+				self.views.set_current_page(1)
 				return
 
-			document = gtkhtml2.Document()
-			document.connect("request_url", self.htmlview_request_url)
-			document.clear()
-			document.open_stream('text/html')
-			document.write_stream(self.preview_html(text))
-			document.close_stream()
-			
-			self.browser.set_document(document)			
-			
-			self.views.set_current_page(1)			
+			if gtkhtml_preview:
+				document = gtkhtml2.Document()
+				document.connect("request_url", self.htmlview_request_url)
+				document.clear()
+				document.open_stream('text/html')
+				document.write_stream(self.preview_html(text))
+				document.close_stream()
+				self.browser.set_document(document)
+				self.views.set_current_page(1)
+				return
+
+			f = cache.get_temp()
+			f.write(self.preview_html(text))
+			webbrowser.open('file://'+f.name)
+			widget.set_active(0)
+			return
+
 		else:
 			# edit mode
-			self.views.set_current_page(0)			
+			self.views.set_current_page(0)
 		#context Window.on_togglePreview_toggled }
 
 	def on_btnPost_clicked(self, widget, *args):
 		#context Window.on_btnPost_clicked {
-		
+
 		buffer = self.textview.get_buffer()
 		start, end = buffer.get_bounds()
 		text = buffer.get_text(start, end)
 		subject = self.subj.get_text()
 		tags = self.taglist.get_text()
-		
+
 		if subject == '':
 			self.msg_box("Subject can not be empty", gtk.MESSAGE_WARNING)
 			return
-	
+
 		# actual submitting
 		try:
 			if lj.last_event:
-				result = lj.edit(lj.last_event['itemid'], lj.last_event['eventtime'], 
+				result = lj.edit(lj.last_event['itemid'], lj.last_event['eventtime'],
 					{'subj': subject, 'text': format.post(text), 'tags': tags}
 					)
 			else:
 				result = lj.post({'subj': subject, 'text': format.post(text), 'tags': tags})
-			
+
 			# store unaltered text
 			cache.put(result['itemid'], text)
 			lj.last_event = {}
-	
+
 		except xmlrpclib.Fault, inst:
 			self.msg_box(str(inst), gtk.MESSAGE_WARNING)
 		except xmlrpclib.ProtocolError:
