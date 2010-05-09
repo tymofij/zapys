@@ -1,0 +1,19 @@
+Zapys LiveJournal client
+
+Requirements:
+=============
+    * python
+    * gtk2
+    * pygtk2-libglade
+    * gnome-python2-gtkhtml2
+
+Installation
+=============
+    * untar
+    * run zapys.py - the file ~/.zapys/config must be created.
+      edit it, enter your creditentials
+    * to use “latin quotes” instead of «cyrillic ones» comment a line in replacements.py
+
+Cheers...
+
+Timothy Babych <tim.babych@gmail.com>

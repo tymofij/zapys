@@ -1,0 +1,21 @@
+# use glob syntax.
+syntax: glob
+*~*
+*.pyc
+*.swp
+.coverage
+settings_local.py*
+*.svn
+*.sqlite*
+sql
+lib
+*.swo
+sql/zipcodes.sql
+static/try.html
+wp-bbg-theme/config.php
+cache
+_cache
+local.json
+# switch to regexp syntax.
+syntax: regexp
+

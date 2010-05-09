@@ -1,0 +1,47 @@
+Zapys LiveJournal Client
+=========================
+
+I use it for writing my LJ posts and editing the last one. 
+I rarely need more power.
+
+The idea of this tool is to allow easy creating of pretty texts.
+
+Inline Replacements
+-------------------
+The text changes while you type — so you can enjoy typografic rightness instantly.
+
+    * proper quotes.
+    * (c) => ©
+    * (r) => ®
+    * (tm) => ™
+    * ... => …
+    * з*їм => з’їм 
+    * uses n-dash and m-dash
+
+Markdown
+--------
+Easy tags:
+
+**bold**
+_italic_
+--strikeout--
+
+Easy lists:
+
+* list item
+* list item
+
+1. list item
+2. list item
+
+The complete Markdown manual lives at http://daringfireball.net/projects/markdown/
+
+LJ replacements:
+----------------
+LJ:username becomes <lj user="username">
+http://example.com becomes hyperlink "example.com"
+
+
+That's all for now. If you liked the software - drop me a line :)
+
+Timothy Babych <tim.babych@gmail.com>
