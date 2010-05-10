@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 import ConfigParser
-c = ConfigParser.ConfigParser(dict(username = 'test', password = 'test'))
+c = ConfigParser.ConfigParser(dict(username='test', password='test', inline_replace='on' ))
 
 import os
 
@@ -20,3 +20,4 @@ else:
 
 username = c.get('DEFAULT', 'username')
 password = c.get('DEFAULT', 'password')
+inline_replace = c.getboolean('DEFAULT', 'inline_replace')

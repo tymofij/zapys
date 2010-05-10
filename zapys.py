@@ -81,7 +81,7 @@ class Window(SimpleGladeApp):
 
 	def on_textview_key_release_event(self, widget, event):
 		#context Window.on_textview_key_release_event {
-		if not event.keyval in (ord(' '), ENTER_KEYCODE) :
+		if not event.keyval in (ord(' '), ENTER_KEYCODE) or not conf.inline_replace:
 			return
 
 		buffer = widget.get_buffer()

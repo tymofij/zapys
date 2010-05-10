@@ -5,7 +5,7 @@ Requirements:
     * python
     * gtk2
     * pygtk2-libglade
-    * gnome-python2-gtkhtml2
+    * python-webkit
 
 Installation
 =============
@@ -14,6 +14,6 @@ Installation
       edit it, enter your creditentials
     * to use “latin quotes” instead of «cyrillic ones» comment a line in replacements.py
 
-Cheers...
+Cheers!
 
 Timothy Babych <tim.babych@gmail.com>
