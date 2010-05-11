@@ -22,6 +22,12 @@ glade_dir = ""
 import webbrowser, re, xmlrpclib, sys
 import conf, replacements, lj, format, cache, strdiff
 
+try:
+    import gtksourceview2 as gtksourceview
+    sourceview = True
+except:
+    sourceview = False
+
 ENTER_KEYCODE = 65293 # FIXME - is there a named constant?
 
 lj = lj.rpcServer(conf.username, conf.password)
@@ -30,189 +36,206 @@ lj = lj.rpcServer(conf.username, conf.password)
 # every top-level widget in the .glade file.
 
 class Window(SimpleGladeApp):
-	def __init__(self, glade_path="zapys.glade", root="window", domain=None):
-		glade_path = os.path.join(glade_dir, glade_path)
-		SimpleGladeApp.__init__(self, glade_path, root, domain)
+    def __init__(self, glade_path="zapys.glade", root="window", domain=None):
+        glade_path = os.path.join(glade_dir, glade_path)
+        SimpleGladeApp.__init__(self, glade_path, root, domain)
 
-		# lets create preview control
-		if webkit_preview:
-			self.browser = webkit.WebView()
-			self.scrollbrowser.add(self.browser)
-			self.browser.show()
-
-	def new(self):
-		#context Window.new {
-
-		# init program icon
-		prog_name = sys.argv[0]
-		if prog_name.rfind('/') == -1:
-			self.prog_dir = ''
-		else:
-			self.prog_dir = prog_name[:prog_name.rfind('/')+1]
-
-		# to add images from prgdir to html preview
-		format.prog_dir = os.path.abspath(self.prog_dir)
-
-		self.window.set_icon_from_file(self.prog_dir + "pen.png")
-		#context Window.new }
-
-	#context Window custom methods {
-	#--- Write your own methods here ---#
-
-	def msg_box(self, message, m_type=gtk.MESSAGE_INFO, m_button=gtk.BUTTONS_CLOSE,):
-		msg = gtk.MessageDialog(parent=self.window, buttons=m_button,
-			message_format=message, type=m_type)
-		msg.set_default_response(m_button)
-		msg.run()
-		msg.destroy()
+        # lets create preview control
+        if webkit_preview:
+            self.browser = webkit.WebView()
+            self.scrollbrowser.add(self.browser)
+            self.browser.show()
 
 
-	def clear(self):
-		self.subj.set_text("")
-		self.taglist.set_text("")
-		self.textview.get_buffer().set_text("")
-		if self.togglePreview.get_active():
-			#untoggle
-			self.togglePreview.set_active(False)
-			# edit mode
-			self.views.set_current_page(0)
+        #create source view widget
+        if sourceview:
+            self.textview=gtksourceview.View()
+            self.textview.set_tab_width(4)
+            self.textview.set_auto_indent(True)
+            #create source buffer to replace text buffer
+            source_buffer=gtksourceview.Buffer()
+            self.textview.set_buffer(source_buffer)
+        else:
+            self.textview=gtk.TextView()
 
-	#context Window custom methods }
+        self.scrolltext.add(self.textview)
+        self.textview.show()
 
-	def on_textview_key_release_event(self, widget, event):
-		#context Window.on_textview_key_release_event {
-		if not event.keyval in (ord(' '), ENTER_KEYCODE) or not conf.inline_replace:
-			return
 
-		buffer = widget.get_buffer()
-		start, end = buffer.get_bounds()
-		text_b = buffer.get_text(start, end)
 
-		# original text
-		a = unicode(copy.copy(text_b))
-		# text with replacements
-		b = unicode(copy.copy(text_b))
+    def new(self):
+        #context Window.new {
 
-		# Typographic replacement magic!
-		for search, repl in replacements.inline:
-			b = re.sub(search, repl, b)
+        # init program icon
+        prog_name = sys.argv[0]
+        if prog_name.rfind('/') == -1:
+            self.prog_dir = ''
+        else:
+            self.prog_dir = prog_name[:prog_name.rfind('/')+1]
 
-		r_diff = strdiff.diff(a, b)
+        # to add images from prgdir to html preview
+        format.prog_dir = os.path.abspath(self.prog_dir)
 
-		# gtk drop and insert
-		for n_char, repl in r_diff.items():
-			start = buffer.get_iter_at_offset(n_char)
-			end = start.copy()
-			end.forward_chars(repl['drop_n'])
-			buffer.delete(start, end)
-			buffer.insert(start, repl['insert'])
+        self.window.set_icon_from_file(self.prog_dir + "pen.png")
+        #context Window.new }
 
-		#context Window.on_textview_key_release_event }
+    #context Window custom methods {
+    #--- Write your own methods here ---#
 
-	def on_btnDelete_clicked(self, widget, *args):
-		#context Window.on_btnDelete_clicked {
-		if lj.last_event:
-			lj.del_event(lj.last_event['itemid'])
-		lj.last_event = {}
-		self.clear()
-		#context Window.on_btnDelete_clicked }
+    def msg_box(self, message, m_type=gtk.MESSAGE_INFO, m_button=gtk.BUTTONS_CLOSE,):
+        msg = gtk.MessageDialog(parent=self.window, buttons=m_button,
+            message_format=message, type=m_type)
+        msg.set_default_response(m_button)
+        msg.run()
+        msg.destroy()
 
-	def on_btnLast_clicked(self, widget, *args):
-		#context Window.on_btnLast_clicked {
-		lj.last_event = lj.get_last()
-		#print lj.last_event
-		if lj.last_event.has_key('subject'):
-			self.subj.set_text(unicode(lj.last_event['subject']))
-		else:
-			self.subj.set_text('')
 
-		if lj.last_event['props'].has_key('taglist'):
-			self.taglist.set_text(unicode(lj.last_event['props']['taglist']))
-		else:
-			self.taglist.set_text('')
+    def clear(self):
+        self.subj.set_text("")
+        self.taglist.set_text("")
+        self.textview.get_buffer().set_text("")
+        if self.togglePreview.get_active():
+            #untoggle
+            self.togglePreview.set_active(False)
+            # edit mode
+            self.views.set_current_page(0)
 
-		try:
-			text = cache.get(lj.last_event['itemid'])
-		except IOError:
-			text = unicode(lj.last_event['event'])
+    #context Window custom methods }
 
-		self.textview.get_buffer().set_text(text)
-		#context Window.on_btnLast_clicked }
+    def on_textview_key_release_event(self, widget, event):
+        #context Window.on_textview_key_release_event {
+        if not event.keyval in (ord(' '), ENTER_KEYCODE) or not conf.inline_replace:
+            return
 
-	def preview_html(self, text):
-		html = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
-		html += '<html xmlns="http://www.w3.org/1999/xhtml"><head>'
-		html += '<style>'+open(self.prog_dir+"style.css").read()+'</style>'
-		html += '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">'
-		html += '</head><body><div id="zapys">'
-		html += format.preview(text)
-		html += '</div></body></html>'
-		return html
+        buffer = widget.get_buffer()
+        start, end = buffer.get_bounds()
+        text_b = buffer.get_text(start, end)
 
-	def on_togglePreview_toggled(self, widget, *args):
-		#context Window.on_togglePreview_toggled {
+        # original text
+        a = unicode(copy.copy(text_b))
+        # text with replacements
+        b = unicode(copy.copy(text_b))
 
-		if widget.get_active():
-			# the toggle button is down - go to preview mode
+        # Typographic replacement magic!
+        for search, repl in replacements.inline:
+            b = re.sub(search, repl, b)
 
-			buffer = self.textview.get_buffer()
-			start, end = buffer.get_bounds()
-			text = buffer.get_text(start, end)
-			subject = self.subj.get_text()
+        r_diff = strdiff.diff(a, b)
 
-			f = cache.get_temp()
-			f.write(self.preview_html(text))
+        # gtk drop and insert
+        for n_char, repl in r_diff.items():
+            start = buffer.get_iter_at_offset(n_char)
+            end = start.copy()
+            end.forward_chars(repl['drop_n'])
+            buffer.delete(start, end)
+            buffer.insert(start, repl['insert'])
 
-			if webkit_preview:
-				self.browser.open('file://'+f.name)
-				self.views.set_current_page(1)
-			else:
-				webbrowser.open('file://'+f.name)
-				widget.set_active(0)
+        #context Window.on_textview_key_release_event }
 
-		else:
-			# edit mode
-			self.views.set_current_page(0)
-		#context Window.on_togglePreview_toggled }
+    def on_btnDelete_clicked(self, widget, *args):
+        #context Window.on_btnDelete_clicked {
+        if lj.last_event:
+            lj.del_event(lj.last_event['itemid'])
+        lj.last_event = {}
+        self.clear()
+        #context Window.on_btnDelete_clicked }
 
-	def on_btnPost_clicked(self, widget, *args):
-		#context Window.on_btnPost_clicked {
+    def on_btnLast_clicked(self, widget, *args):
+        #context Window.on_btnLast_clicked {
+        lj.last_event = lj.get_last()
+        #print lj.last_event
+        if lj.last_event.has_key('subject'):
+            self.subj.set_text(unicode(lj.last_event['subject']))
+        else:
+            self.subj.set_text('')
 
-		buffer = self.textview.get_buffer()
-		start, end = buffer.get_bounds()
-		text = buffer.get_text(start, end)
-		subject = self.subj.get_text()
-		tags = self.taglist.get_text()
+        if lj.last_event['props'].has_key('taglist'):
+            self.taglist.set_text(unicode(lj.last_event['props']['taglist']))
+        else:
+            self.taglist.set_text('')
 
-		if subject == '':
-			self.msg_box("Subject can not be empty", gtk.MESSAGE_WARNING)
-			return
+        try:
+            text = cache.get(lj.last_event['itemid'])
+        except IOError:
+            text = unicode(lj.last_event['event'])
 
-		# actual submitting
-		try:
-			if lj.last_event:
-				result = lj.edit(lj.last_event['itemid'], lj.last_event['eventtime'],
-					{'subj': subject, 'text': format.post(text), 'tags': tags}
-					)
-			else:
-				result = lj.post({'subj': subject, 'text': format.post(text), 'tags': tags})
+        self.textview.get_buffer().set_text(text)
+        #context Window.on_btnLast_clicked }
 
-			# store unaltered text
-			cache.put(result['itemid'], text)
-			lj.last_event = {}
+    def preview_html(self, text):
+        html = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">'
+        html += '<html xmlns="http://www.w3.org/1999/xhtml"><head>'
+        html += '<style>'+open(self.prog_dir+"style.css").read()+'</style>'
+        html += '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">'
+        html += '</head><body><div id="zapys">'
+        html += format.preview(text)
+        html += '</div></body></html>'
+        return html
 
-		except xmlrpclib.Fault, inst:
-			self.msg_box(str(inst), gtk.MESSAGE_WARNING)
-		except xmlrpclib.ProtocolError:
-			self.msg_box("No connection", gtk.MESSAGE_ERROR)
-		else:
-			self.msg_box("Succesfully posted",  gtk.MESSAGE_INFO, gtk.BUTTONS_OK)
-			self.clear()
-		#context Window.on_btnPost_clicked }
+    def on_togglePreview_toggled(self, widget, *args):
+        #context Window.on_togglePreview_toggled {
+
+        if widget.get_active():
+            # the toggle button is down - go to preview mode
+
+            buffer = self.textview.get_buffer()
+            start, end = buffer.get_bounds()
+            text = buffer.get_text(start, end)
+            subject = self.subj.get_text()
+
+            f = cache.get_temp()
+            f.write(self.preview_html(text))
+
+            if webkit_preview:
+                self.browser.open('file://'+f.name)
+                self.views.set_current_page(1)
+            else:
+                webbrowser.open('file://'+f.name)
+                widget.set_active(0)
+
+        else:
+            # edit mode
+            self.views.set_current_page(0)
+        #context Window.on_togglePreview_toggled }
+
+    def on_btnPost_clicked(self, widget, *args):
+        #context Window.on_btnPost_clicked {
+
+        buffer = self.textview.get_buffer()
+        start, end = buffer.get_bounds()
+        text = buffer.get_text(start, end)
+        subject = self.subj.get_text()
+        tags = self.taglist.get_text()
+
+        if subject == '':
+            self.msg_box("Subject can not be empty", gtk.MESSAGE_WARNING)
+            return
+
+        # actual submitting
+        try:
+            if lj.last_event:
+                result = lj.edit(lj.last_event['itemid'], lj.last_event['eventtime'],
+                    {'subj': subject, 'text': format.post(text), 'tags': tags}
+                    )
+            else:
+                result = lj.post({'subj': subject, 'text': format.post(text), 'tags': tags})
+
+            # store unaltered text
+            cache.put(result['itemid'], text)
+            lj.last_event = {}
+
+        except xmlrpclib.Fault, inst:
+            self.msg_box(str(inst), gtk.MESSAGE_WARNING)
+        except xmlrpclib.ProtocolError:
+            self.msg_box("No connection", gtk.MESSAGE_ERROR)
+        else:
+            self.msg_box("Succesfully posted",  gtk.MESSAGE_INFO, gtk.BUTTONS_OK)
+            self.clear()
+        #context Window.on_btnPost_clicked }
 
 def main():
-	window = Window()
-	window.run()
+    window = Window()
+    window.run()
 
 if __name__ == "__main__":
-	main()
+    main()
