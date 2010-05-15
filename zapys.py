@@ -51,7 +51,7 @@ class Window(SimpleGladeApp):
         if sourceview:
             self.textview=gtksourceview.View()
             self.textview.set_tab_width(4)
-            self.textview.set_wrap_mode(True)
+            self.textview.set_wrap_mode(gtk.WRAP_WORD)
             self.textview.set_auto_indent(True)
             #create source buffer to replace text buffer
             source_buffer=gtksourceview.Buffer()
