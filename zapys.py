@@ -20,7 +20,7 @@ except ImportError:
 glade_dir = ""
 
 import webbrowser, re, xmlrpclib, sys
-import conf, replacements, lj, format, cache, strdiff
+import conf, replacements, lj, format, cache
 
 try:
     import gtksourceview2 as gtksourceview
@@ -102,36 +102,6 @@ class Window(SimpleGladeApp):
             self.views.set_current_page(0)
 
     #context Window custom methods }
-
-    def on_textview_key_release_event(self, widget, event):
-        #context Window.on_textview_key_release_event {
-        if not event.keyval in (ord(' '), ENTER_KEYCODE) or not conf.inline_replace:
-            return
-
-        buffer = widget.get_buffer()
-        start, end = buffer.get_bounds()
-        text_b = buffer.get_text(start, end)
-
-        # original text
-        a = unicode(copy.copy(text_b))
-        # text with replacements
-        b = unicode(copy.copy(text_b))
-
-        # Typographic replacement magic!
-        for search, repl in replacements.inline:
-            b = re.sub(search, repl, b)
-
-        r_diff = strdiff.diff(a, b)
-
-        # gtk drop and insert
-        for n_char, repl in r_diff.items():
-            start = buffer.get_iter_at_offset(n_char)
-            end = start.copy()
-            end.forward_chars(repl['drop_n'])
-            buffer.delete(start, end)
-            buffer.insert(start, repl['insert'])
-
-        #context Window.on_textview_key_release_event }
 
     def on_btnDelete_clicked(self, widget, *args):
         #context Window.on_btnDelete_clicked {

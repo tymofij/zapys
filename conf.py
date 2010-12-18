@@ -9,7 +9,7 @@ import os
 conf_dir = os.path.expanduser('~/.zapys/')
 
 if not os.path.isdir(conf_dir):
-	os.makedirs(conf_dir)
+    os.makedirs(conf_dir)
 
 userconf = conf_dir+'config'
 
@@ -20,4 +20,3 @@ else:
 
 username = c.get('DEFAULT', 'username')
 password = c.get('DEFAULT', 'password')
-inline_replace = c.getboolean('DEFAULT', 'inline_replace')

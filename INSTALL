@@ -12,7 +12,6 @@ Installation
     * untar
     * run zapys.py - the file ~/.zapys/config must be created.
       edit it, enter your creditentials
-    * to use “latin quotes” instead of «cyrillic ones» comment a line in replacements.py
 
 Cheers!
 

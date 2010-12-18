@@ -1,22 +1,21 @@
 Zapys LiveJournal Client
 =========================
 
-I use it for writing my LJ posts and editing the last one. 
-I rarely need more power.
+Supports Markdown and typography
 
-The idea of this tool is to allow easy creating of pretty texts.
-
-Inline Replacements
+Replacements
 -------------------
-The text changes while you type — so you can enjoy typografic rightness instantly.
 
-    * proper quotes.
-    * (c) => ©
-    * (r) => ®
-    * (tm) => ™
-    * ... => …
-    * з*їм => з’їм 
-    * uses n-dash and m-dash
+ * proper quotes.
+ * (c) => ©
+ * (r) => ®
+ * (tm) => ™
+ * ... => …
+ * з*їм => з’їм 
+ * uses n-dash and m-dash
+
+ ((citation)) gets special treatment
+ --strikeout--
 
 Markdown
 --------
@@ -24,7 +23,6 @@ Easy tags:
 
 **bold**
 _italic_
---strikeout--
 
 Easy lists:
 

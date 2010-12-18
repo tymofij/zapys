@@ -2,10 +2,10 @@ body, td {font-family: Georgia, serif; font-size: 13px; }
 
 body { margin: 0px; padding: 0px; background: white;}
 
-div#zapys {max-width: 600px; padding: 5px; background: white;}
+div#zapys {padding: 5px; background: white;}
 
 s {text-decoration : line-through;}
-p {margin: 5px 0px; padding: 0px;}
+p {margin: 10px 0px; padding: 0px;}
 
 a {color:#00cc; text-decoration:underline; }
 
