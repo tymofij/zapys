@@ -1,6 +1,9 @@
 Zapys Changelog
 ================
 
+2010-12-18:
+    * no inline replacements
+
 2010-05-09:
     * replaced gtkhtml2 with webkit
 
