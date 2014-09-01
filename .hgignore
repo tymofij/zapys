@@ -16,6 +16,8 @@ wp-bbg-theme/config.php
 cache
 _cache
 local.json
+zapys.sublime-project
+zapys.sublime-workspace
 # switch to regexp syntax.
 syntax: regexp
 
