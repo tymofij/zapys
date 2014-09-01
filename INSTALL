@@ -5,14 +5,13 @@ Requirements:
     * python
     * gtk2
     * pygtk2-libglade
+    * python-xdg
     * python-webkit
 
 Installation
 =============
     * untar
-    * run zapys.py - the file ~/.zapys/config must be created.
-      edit it, enter your creditentials
+    * run zapys.py - the file ~/.config/zapys/config.ini must be created.
+      edit it, enter your credentials
 
 Cheers!
-
-Timothy Babych <tim.babych@gmail.com>

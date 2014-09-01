@@ -1,22 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-import ConfigParser
-c = ConfigParser.ConfigParser(dict(username='test', password='test', inline_replace='on' ))
+import ConfigParser, os
+from xdg import BaseDirectory
 
-import os
 
-conf_dir = os.path.expanduser('~/.zapys/')
+config = ConfigParser.ConfigParser(dict(username='test', password='test', inline_replace='on' ))
+conf_dir = BaseDirectory.save_config_path('zapys')
 
-if not os.path.isdir(conf_dir):
-    os.makedirs(conf_dir)
-
-userconf = conf_dir+'config'
+userconf = os.path.join(conf_dir, 'config.ini')
 
 if os.path.exists(userconf):
-    c.read(userconf)
+    config.read(userconf)
 else:
-    c.write(open(userconf, 'w'))
+    config.write(open(userconf, 'w'))
 
-username = c.get('DEFAULT', 'username')
-password = c.get('DEFAULT', 'password')
+username = config.get('DEFAULT', 'username')
+password = config.get('DEFAULT', 'password')
