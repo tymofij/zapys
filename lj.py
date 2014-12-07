@@ -6,21 +6,24 @@ import xmlrpclib, time
 from hashlib import md5
 
 LJ_TIME_FORMAT = r"%Y-%m-%d %H:%M:%S"
+LJ_SERVER_URL = "http://www.livejournal.com/interface/xmlrpc"
 
 class rpcServer:
     username = ''
     password = ''
+    server_url = ''
     initialized = False
 
     last_event = {}
 
-    def __init__(self, user, password):
+    def __init__(self, user, password, server_url=LJ_SERVER_URL):
         self.username = user
         self.hpassword = md5(password).hexdigest()
+        self.server_url = server_url
 
     def connect(self):
         if not self.initialized:
-            self.server = xmlrpclib.Server("http://www.livejournal.com/interface/xmlrpc")
+            self.server = xmlrpclib.Server(self.server_url)
             self.initialized = True
 
     def get_last(self):

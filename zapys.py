@@ -30,7 +30,7 @@ except:
 
 ENTER_KEYCODE = 65293 # FIXME - is there a named constant?
 
-lj = lj.rpcServer(conf.username, conf.password)
+lj = lj.rpcServer(conf.username, conf.password, conf.server_url)
 
 # From here through main() codegen inserts/updates a class for
 # every top-level widget in the .glade file.
@@ -126,7 +126,7 @@ class Window(SimpleGladeApp):
             self.taglist.set_text('')
 
         try:
-            text = cache.get(lj.last_event['itemid'])
+            text = cache.get(conf.server, lj.last_event['itemid'])
         except IOError:
             text = unicode(lj.last_event['event'])
 
@@ -192,7 +192,7 @@ class Window(SimpleGladeApp):
                 result = lj.post({'subj': subject, 'text': format.post(text), 'tags': tags})
 
             # store unaltered text
-            cache.put(result['itemid'], text)
+            cache.put(conf.server, result['itemid'], text)
             lj.last_event = {}
 
         except xmlrpclib.Fault, inst:
