@@ -7,18 +7,16 @@ Replacements
 -------------------
 
  * proper quotes
- * (c) => ©
- * (r) => ®
- * (tm) => ™
- * ... => …
- * з*їм => з’їм
- * uses n-dash and m-dash
+ * (c) ⇒ ©
+ * (r) ⇒ ®
+ * (tm) ⇒ ™
+ * ... ⇒ …
+ * n-dash and m-dash
+ * з*їм ⇒ з’їм
+ * LJ:username ⇒ &lt;lj user="username"&gt;
 
- ((citation)) gets special treatment
+((citation)) gets special treatment
 
-LJ replacements:
-----------------
-LJ:username becomes <lj user="username">
 http://example.com becomes hyperlink "example.com"
 
 <img src="https://raw.githubusercontent.com/tymofij/zapys/master/screenshot.png" alt="screenshot" />
