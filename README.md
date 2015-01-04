@@ -11,7 +11,7 @@ Replacements
  * (r) => ®
  * (tm) => ™
  * ... => …
- * з*їм => з’їм 
+ * з*їм => з’їм
  * uses n-dash and m-dash
 
  ((citation)) gets special treatment
@@ -39,7 +39,4 @@ LJ replacements:
 LJ:username becomes <lj user="username">
 http://example.com becomes hyperlink "example.com"
 
-
-That's all for now. If you liked the software - drop me a line :)
-
-Timothy Babych <tim.babych@gmail.com>
+<img src="https://raw.githubusercontent.com/tymofij/zapys/master/screenshot.png" alt="screenshot" />
