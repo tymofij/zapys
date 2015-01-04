@@ -6,7 +6,7 @@ Supports Markdown and typography
 Replacements
 -------------------
 
- * proper quotes.
+ * proper quotes
  * (c) => ©
  * (r) => ®
  * (tm) => ™
@@ -15,24 +15,6 @@ Replacements
  * uses n-dash and m-dash
 
  ((citation)) gets special treatment
- --strikeout--
-
-Markdown
---------
-Easy tags:
-
-**bold**
-_italic_
-
-Easy lists:
-
-* list item
-* list item
-
-1. list item
-2. list item
-
-The complete Markdown manual lives at http://daringfireball.net/projects/markdown/
 
 LJ replacements:
 ----------------
